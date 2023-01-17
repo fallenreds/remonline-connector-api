@@ -1,0 +1,13 @@
+{
+  "names": "array",
+  "phones": "array",
+  "emails": "array",
+  "addresses": "array",
+  "discount_codes": "array",
+  "modified_at": "array",
+  "created_at": "array",
+  "ad_campaigns": "array",
+  "juridical": "bool",
+  "conflicted": "bool",
+  "supplier": "bool"
+}
