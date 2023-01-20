@@ -1,0 +1,13 @@
+{
+  "name": "string",
+  "phone": "array",
+  "email": "string",
+  "address": "string",
+  "notes": "string",
+  "juridical": "bool",
+  "conflicted": "bool",
+  "marketing_source": "integer",
+  "discount_code": "string",
+  "discount_goods": "float",
+  "discount_services": "float"
+}

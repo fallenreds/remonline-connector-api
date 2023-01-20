@@ -1,0 +1,22 @@
+{
+  "branch_id": "int",
+  "order_type": "int",
+  "brand": "string",
+  "model": "string",
+  "serial": "string",
+  "urgent": "bool",
+  "estimated_cost": "float",
+  "appearance": "string",
+  "packagelist": "string",
+  "malfunction": "string" ,
+  "assigned_at": "timestamp" ,
+  "estimated_done_at": "timestamp",
+  "manager": "int" ,
+  "engineer": "int" ,
+  "manager_notes": "string",
+  "warranty_date": "timestamp",
+  "kindof_good": "string" ,
+  "ad_campaign_id": "int" ,
+  "custom_fields": "object",
+  "client_id": "int"
+}

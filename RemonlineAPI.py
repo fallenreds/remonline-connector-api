@@ -28,6 +28,19 @@ class BaseRemonline:
         if response.status_code == 500:
             return {"data": None, 'success': False}
 
+    def post(self, url, data, **kwargs):
+        response = requests.post(url=url, data=data, **kwargs)
+
+        if response.status_code == 101:
+            self.token = self.get_user_token()
+            response = requests.post(url=url, data=data, **kwargs)
+
+        if response.status_code == 200:
+            return response
+
+        if response.status_code == 500:
+            return {"data": None, 'success': False}
+
     def get_user_token(self) -> str:
         data = {"api_key": self.api_key}
         api_path = "token/new"
@@ -59,6 +72,21 @@ class BaseRemonline:
         response = self.get(url=request_url, params=data)
         return response.json()
 
+    def required_builder(self, required):
+        if required:
+            return required.update({"token": self.token})
+        return {"token": self.token}
+
+    def post_objects(self, api_path, request_url: str, accepted_params_path: str = None, **kwargs):
+        optional = None
+        required = {"token": self.token}
+        if accepted_params_path:
+            with open(accepted_params_path) as file:
+                optional = json.load(file)
+        data = self.set_params(required, optional, **kwargs)
+        response = self.post(url=request_url, data=data)
+        return response.json()
+
     @staticmethod
     def params_builder(value_type, key, value):
         """
@@ -73,6 +101,11 @@ class BaseRemonline:
 
 
 class RemonlineAPI(BaseRemonline):
+    def get_branches(self, **kwargs):
+        api_path = "branches/"
+        request_url = self._url_builder(api_path)
+        return self.get_objects(api_path=api_path,
+                                request_url=request_url)
 
     def get_clients(self, **kwargs) -> dict:
         """
@@ -106,11 +139,27 @@ class RemonlineAPI(BaseRemonline):
     def get_main_warehouse_id(self):
         return self.get_warehouse().get("data")[0].get('id')
 
+    def new_client(self, **kwargs):
+        api_path = "clients/"
+        request_url = f"{self.domain}{api_path}"
+        return self.post_objects(api_path=api_path, accepted_params_path="new_client.json", request_url=request_url,
+                                 **kwargs)
+
+    def new_order(self, **kwargs):
+        """
+
+        :param branch_id:
+        :param order_type:
+        :param client_id:
+        :param model:
+        :return:
+        """
+        api_path = "order/"
+        request_url = f"{self.domain}{api_path}"
+        return self.post_objects(api_path=api_path,
+                                 accepted_params_path="new_order.json",
+                                 request_url=request_url,
+                                 **kwargs)
 
 
 
-
-
-
-cls = RemonlineAPI(REMONLINE_API_KEY_PROD)
-print(cls.get_clients())
