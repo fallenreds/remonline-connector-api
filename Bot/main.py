@@ -2,6 +2,7 @@ import telebot
 from telebot import types
 from config import BOT_TOKEN
 from RemonlineAPI import *
+from dataset.Category import *
 
 bot = telebot.TeleBot(token=BOT_TOKEN, parse_mode="HTML")
 remonline = RemonlineAPI(api_key=REMONLINE_API_KEY_PROD)
@@ -31,18 +32,15 @@ def catalog(message):
 def inline_callback(call):
     if call.data == 'category':
         category_data = remonline.get_categories().get("data")
-        # data = ([category.get("title") for category in category_data])
-        noparent = [cat for cat in category_data if "parent_id" not in cat.keys()]
-        markup = types.InlineKeyboardMarkup(row_width=len(noparent))
-        for cat in noparent:
-            markup.add(types.InlineKeyboardButton(text=cat.get("title"), callback_data=cat.get('id')))
-        bot.send_message(call.message.chat.id, text='Выберите категорию', reply_markup=markup)
-        # for category in data[:8]:
-        #     markup.add(types.InlineKeyboardButton(text=category, callback_data=category))
-        # bot.send_message(call.message.chat.id, text='Выберите категорию', reply_markup=markup)
-
+        category = Category(category_data)
+        markup = types.InlineKeyboardMarkup(row_width=8)
+        for head in category.get_headers():
+            button = types.InlineKeyboardButton(head.title, callback_data=head.id)
+            markup.add(button)
+        bot.send_message(call.message.chat.id, text="Выберите одну из категорий: ", reply_markup=markup)
     if call.data == 'textsearch':
         bot.send_message(call.message.chat.id, text='Вы выбрали категорию')
+
 
 
 bot.infinity_polling()

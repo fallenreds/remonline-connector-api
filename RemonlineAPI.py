@@ -114,7 +114,7 @@ class RemonlineAPI(BaseRemonline):
         """
         api_path = "clients/"
         request_url = self._url_builder(api_path)
-        return self.get_objects(api_path=api_path, accepted_params_path="clients_params.json", request_url=request_url,
+        return self.get_objects(api_path=api_path, accepted_params_path="params/clients_params.json", request_url=request_url,
                                 **kwargs)
 
     def get_categories(self, **kwargs) -> dict:
@@ -128,7 +128,7 @@ class RemonlineAPI(BaseRemonline):
     def get_goods(self, warehouse, **kwargs) -> dict:
         api_path = f"warehouse/goods/{warehouse}"
         request_url = f"{self.domain}{api_path}"
-        return self.get_objects(api_path=api_path, accepted_params_path="goods_params.json", request_url=request_url,
+        return self.get_objects(api_path=api_path, accepted_params_path="params/goods_params.json", request_url=request_url,
                                 **kwargs)
 
     def get_warehouse(self, **kwargs):
@@ -142,7 +142,7 @@ class RemonlineAPI(BaseRemonline):
     def new_client(self, **kwargs):
         api_path = "clients/"
         request_url = f"{self.domain}{api_path}"
-        return self.post_objects(api_path=api_path, accepted_params_path="new_client.json", request_url=request_url,
+        return self.post_objects(api_path=api_path, accepted_params_path="params/new_client.json", request_url=request_url,
                                  **kwargs)
 
     def new_order(self, **kwargs):
@@ -157,7 +157,7 @@ class RemonlineAPI(BaseRemonline):
         api_path = "order/"
         request_url = f"{self.domain}{api_path}"
         return self.post_objects(api_path=api_path,
-                                 accepted_params_path="new_order.json",
+                                 accepted_params_path="params/new_order.json",
                                  request_url=request_url,
                                  **kwargs)
 
