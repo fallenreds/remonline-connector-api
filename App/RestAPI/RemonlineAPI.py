@@ -1,10 +1,6 @@
 import requests
 import csv
 import json
-
-from config import REMONLINE_API_KEY_PROD, REMONLINE_API_KEY_TEST
-
-
 class BaseRemonline:
 
     def __init__(self, api_key):
@@ -128,7 +124,7 @@ class RemonlineAPI(BaseRemonline):
     def get_goods(self, warehouse, **kwargs) -> dict:
         api_path = f"warehouse/goods/{warehouse}"
         request_url = f"{self.domain}{api_path}"
-        return self.get_objects(api_path=api_path, accepted_params_path="params/goods_params.json", request_url=request_url,
+        return self.get_objects(api_path=api_path, accepted_params_path="RestAPI/params/goods_params.json", request_url=request_url,
                                 **kwargs)
 
     def get_warehouse(self, **kwargs):
