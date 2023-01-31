@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  back:
+    build: .
+    command: uvicorn main:app --reload
+    volumes:
+      - .:/backend
+    ports:
+      - 8000:8000

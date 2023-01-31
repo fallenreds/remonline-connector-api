@@ -2,8 +2,8 @@ import telebot
 from telebot import types
 
 
-from config import *
-from dataset.Category import *
+from App.config import *
+from App.dataset.Category import *
 
 bot = telebot.TeleBot(token=BOT_TOKEN, parse_mode="HTML")
 remonline = RemonlineAPI(api_key=REMONLINE_API_KEY_PROD)
