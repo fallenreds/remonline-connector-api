@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 class BaseRemonline:
 
     def __init__(self, api_key):
@@ -22,7 +23,7 @@ class BaseRemonline:
             return response
 
         if response.status_code == 500:
-            return {"data": None, 'success': False}
+            return {"data": {}, 'success': False}
 
     def post(self, url, data, **kwargs):
         response = requests.post(url=url, data=data, **kwargs)
@@ -35,7 +36,7 @@ class BaseRemonline:
             return response
 
         if response.status_code == 500:
-            return {"data": None, 'success': False}
+            return {"data": {}, 'success': False}
 
     def get_user_token(self) -> str:
         data = {"api_key": self.api_key}
@@ -81,6 +82,7 @@ class BaseRemonline:
                 optional = json.load(file)
         data = self.set_params(required, optional, **kwargs)
         response = self.post(url=request_url, data=data)
+        print(response.status_code)
         return response.json()
 
     @staticmethod
@@ -110,7 +112,8 @@ class RemonlineAPI(BaseRemonline):
         """
         api_path = "clients/"
         request_url = self._url_builder(api_path)
-        return self.get_objects(api_path=api_path, accepted_params_path="RestAPI/params/clients_params.json", request_url=request_url,
+        return self.get_objects(api_path=api_path, accepted_params_path="RestAPI/params/clients_params.json",
+                                request_url=request_url,
                                 **kwargs)
 
     def get_categories(self, **kwargs) -> dict:
@@ -124,7 +127,8 @@ class RemonlineAPI(BaseRemonline):
     def get_goods(self, warehouse, **kwargs) -> dict:
         api_path = f"warehouse/goods/{warehouse}"
         request_url = f"{self.domain}{api_path}"
-        return self.get_objects(api_path=api_path, accepted_params_path="RestAPI/params/goods_params.json", request_url=request_url,
+        return self.get_objects(api_path=api_path, accepted_params_path="RestAPI/params/goods_params.json",
+                                request_url=request_url,
                                 **kwargs)
 
     def get_warehouse(self, **kwargs):
@@ -138,8 +142,14 @@ class RemonlineAPI(BaseRemonline):
     def new_client(self, **kwargs):
         api_path = "clients/"
         request_url = f"{self.domain}{api_path}"
-        return self.post_objects(api_path=api_path, accepted_params_path="RestAPI/params/new_client.json", request_url=request_url,
+        return self.post_objects(api_path=api_path, accepted_params_path="RestAPI/params/new_client.json",
+                                 request_url=request_url,
                                  **kwargs)
+
+    def get_order_types(self, **kwargs):
+        api_path = "order/types/"
+        request_url = f"{self.domain}{api_path}"
+        return self.get_objects(api_path=api_path, request_url=request_url, **kwargs)
 
     def new_order(self, **kwargs):
         """
@@ -156,6 +166,14 @@ class RemonlineAPI(BaseRemonline):
                                  accepted_params_path="RestAPI/params/new_order.json",
                                  request_url=request_url,
                                  **kwargs)
+
+    def find_or_create_client(self, phone: str, name: str):
+        client = self.get_clients(phones=phone)
+        if client["data"]:
+            return client
+        self.new_client(phone=phone, name=name)
+        new_client = self.get_clients(phones=phone)
+        return new_client
 
 
 
