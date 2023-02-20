@@ -82,7 +82,6 @@ class BaseRemonline:
                 optional = json.load(file)
         data = self.set_params(required, optional, **kwargs)
         response = self.post(url=request_url, data=data)
-        print(response.status_code)
         return response.json()
 
     @staticmethod

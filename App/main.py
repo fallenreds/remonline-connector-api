@@ -71,6 +71,7 @@ def get_all_goods():
     get_all_goods()
 
 
+
 t = threading.Thread(target=get_all_goods).start()
 
 
@@ -123,7 +124,7 @@ def post_order(order: OrderModel):
         order.ttn)
     db.connection.close()
     if not order.prepayment:
-        return new_remonline_order(OrderIdModel(**{"order_id": order_id}))
+        remonline_order = new_remonline_order(OrderIdModel(**{"order_id": order_id}))
     return {"order_id": order_id}
 
 
@@ -146,8 +147,12 @@ def new_remonline_order(order_id: OrderIdModel):
                                       order_type=order_type,
                                       client_id=client_remonline_id,
                                       manager_notes=manager_notes
+
                                       )
+        print(response)
+        db.add_remonline_order_id(response['data']['id'], order_id.order_id)
         db.connection.close()
+
         return {"data": response}
     db.connection.close()
 
