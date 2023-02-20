@@ -7,6 +7,20 @@ class DBConnection:
         self.connection.row_factory = sqlite3.Row
         self.cursor = self.connection.cursor()
 
+    def find_order_by_ttn(self, ttn):
+        self.cursor.execute("""
+                    select * from orders
+                    where ttn = ?
+                """, (ttn,))
+        return self.cursor.fetchone()
+
+    def find_order_by_id(self, order_id):
+        self.cursor.execute("""
+                            select * from orders
+                            where id = ?
+                        """, (order_id,))
+        return self.cursor.fetchone()
+
     def post_client(self,
                     id_remonline,
                     telegram_id,
@@ -51,6 +65,8 @@ class DBConnection:
         data = [dict(ix) for ix in self.cursor.fetchall()]
         return data
 
+
+
     def get_client_by_telegram_id(self, telegram_id):
         self.cursor.execute("""
             select * from client
@@ -64,6 +80,7 @@ class DBConnection:
             where id= {0}
         """.format(client_id))
         return self.cursor.fetchone()
+
 
     def update_shopping_cart_count(self, cart_id, count):
         self.cursor.execute("""
@@ -84,6 +101,33 @@ class DBConnection:
             insert into shopping_cart ('telegram_id', 'good_id', 'count')
             values(?,?,?)""", (telegram_id, good_id, count))
         self.connection.commit()
+
+    def get_visitor_by_tg(self, telegram_id):
+        self.cursor.execute("""select * from visitors where telegram_id=?""", (telegram_id,))
+        return self.cursor.fetchone()
+
+    def get_visitors(self):
+
+        self.cursor.execute(f"""select * from visitors""")
+        return self.cursor.fetchall()
+
+    def post_new_visitor(self, telegram_id):
+        response = {"success": True, "data": None}
+        print(self.get_visitor_by_tg(telegram_id))
+        try:
+            if not self.get_visitor_by_tg(telegram_id):
+                self.cursor.execute(f""" 
+                            insert into visitors ('telegram_id')
+                            values(?)""", (telegram_id,))
+                self.connection.commit()
+                response = {"success": True, "data": "New visitor has successfully created"}
+            else:
+                response = {"success": True, "data": "New visitor has NOT successfully created"}
+        except Exception as error:
+            print(error)
+            response = {"success": False, "data": error}
+        finally:
+            return response
 
     def get_all_orders(self, telegram_id=None, order_id=None):
         filter = ''
@@ -174,6 +218,30 @@ class DBConnection:
                     where is_completed = 0 and is_paid=0 and prepayment=1 and datetime(date, '+1 hour') < datetime('now')
                 """)
         return self.cursor.fetchall()
+
+    def update_prepayment_type(self, order_id):
+        self.cursor.execute("""
+                   update orders
+                   set 'prepayment' = 1
+                   where id = {0} 
+                   """.format(order_id,))
+        self.connection.commit()
+
+    def update_ttn(self, order_id, ttn):
+        response = {"success":True}
+        print(order_id)
+        try:
+            self.cursor.execute("""
+                               update orders
+                               set ttn = ?
+                               where id = ? 
+                               """, (ttn, order_id))
+            self.connection.commit()
+        except Exception as error:
+            print(error)
+            response = {"success": False}
+        finally:
+            return response
 
     def create_discount(self, procent, month_payment):
         success = True

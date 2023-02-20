@@ -1,5 +1,6 @@
 import time
 import uvicorn
+from aiogram.types.base import Integer
 from pydantic import PositiveInt
 from fastapi import FastAPI
 from RestAPI.RemonlineAPI import *
@@ -16,7 +17,6 @@ warehouse = CRM.get_main_warehouse_id()
 TEST_CRM = RemonlineAPI(REMONLINE_API_KEY_TEST)
 branch = TEST_CRM.get_branches()["data"][0]["id"]
 categories_to_filter = [753923]
-
 
 # CRM : RemonlineAPI
 # warehouse :int
@@ -79,7 +79,7 @@ def get_discounts():
     db = DBConnection("info.db")
     discounts = db.get_all_discounts()
     discounts.sort(key=lambda x: x['month_payment'])
-    return  discounts
+    return discounts
 
 
 @app.get("/api/v1/no-paid-along-time/")
@@ -188,12 +188,47 @@ def update_shopping_cart_count(id: int, CountModel: UpdateCountModel):
     db.connection.close()
 
 
+@app.patch("/api/v1/updatettn/")
+def update_order_ttn(TTN_data: NewTTNModel):
+    db = DBConnection("info.db")
+    response = db.update_ttn(TTN_data.order_id, TTN_data.ttn)
+    db.connection.close()
+    return response
+
+
+
+
+
+@app.get("/api/v1/visitors/{telegram_id}")
+def get_visitors():
+    db = DBConnection("info.db")
+    response = db.get_visitors()
+    db.connection.close()
+    return response
+
+
+@app.get("/api/v1/orderbyttn/{ttn}")
+def get_order_by_ttn(ttn: int):
+    db = DBConnection("info.db")
+    response = db.find_order_by_ttn(ttn)
+    db.connection.close()
+    return response
+
+
 @app.get("/api/v1/getorder/{telegram_id}")
-def get_order_by_id(telegram_id: int):
+def get_order_by_telegram_id(telegram_id: int):
     db = DBConnection("info.db")
     orders = db.get_all_orders(telegram_id)
     db.connection.close()
     return orders
+
+
+@app.get("/api/v1/getorderbyid/{order_id}")
+def get_order_by_id(order_id: int):
+    db = DBConnection("info.db")
+    order = db.find_order_by_id(order_id)
+    db.connection.close()
+    return order
 
 
 @app.get("/api/v1/ordersuma/{telegram_id}")
@@ -231,6 +266,13 @@ def signin(auth_data: SignInModel):
     db.update_client_telegram_id(client_id=client['id'], new_id=auth_data.telegram_id)
     return {"success": True, "detail": "Session has been updated"}
 
+
+@app.post("/api/v1/AddNewVisitor/{telegram_id}")
+def add_new_visitor(telegram_id):
+    db = DBConnection("info.db")
+    response = db.post_new_visitor(telegram_id)
+    db.connection.close()
+    return response
 
 @app.post("/api/v1/singup/")
 def create_client(client_data: ClientFullModel):
@@ -292,10 +334,9 @@ def get_month_discount(client_id: int):
     client_discount = find_discount(money_spent, discounts)
     print("Потрачено:", money_spent)
     if not client_discount:
-        return {"success": False, "data": "No discount","money_spent": money_spent}
+        return {"success": False, "data": "No discount", "money_spent": money_spent}
 
     return {"success": True, "data": client_discount, "money_spent": money_spent}
-
 
 
 @app.post("/api/v1/discount/")
@@ -306,12 +347,14 @@ def post_discount(discount: DiscountModel):
     db.connection.close()
     return response
 
+
 @app.delete("/api/v1/discount/{discount_id}")
 def delete_discount(discount_id):
     db = DBConnection("info.db")
     response = db.delete_discount(discount_id)
     db.connection.close()
     return response
+
 
 @app.patch("/api/v1/disactiveorder/{order_id}")
 def finish_order(order_id: int):
