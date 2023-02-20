@@ -150,6 +150,11 @@ class RemonlineAPI(BaseRemonline):
         request_url = f"{self.domain}{api_path}"
         return self.get_objects(api_path=api_path, request_url=request_url, **kwargs)
 
+    def get_orders(self, **kwargs):
+        api_path = "order/"
+        request_url = f"{self.domain}{api_path}"
+        return self.get_objects(api_path=api_path, request_url=request_url, accepted_params_path="RestAPI/params/order_params.json", **kwargs)
+
     def new_order(self, **kwargs):
         """
 

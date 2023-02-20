@@ -3,6 +3,8 @@ import uvicorn
 from aiogram.types.base import Integer
 from pydantic import PositiveInt
 from fastapi import FastAPI
+
+from App.UpdateOrdersTask import update_order_task
 from RestAPI.RemonlineAPI import *
 from fastapi.middleware.cors import CORSMiddleware
 from config import *
@@ -49,31 +51,32 @@ json_goods: dict
 
 @app.get("/api/v1/allgoods")
 def get_all_goods():
-    run = True
-    goods = []
-    page = 1
-    while run:
-        response = CRM.get_goods(warehouse, page=page)
-        page += 1
-        if len(response["data"]) < 50:
-            run = False
+    while True:
+        run = True
+        goods = []
+        page = 1
+        while run:
+            response = CRM.get_goods(warehouse, page=page)
+            page += 1
+            if len(response["data"]) < 50:
+                run = False
 
-        if len(response["data"]):
-            goods += response["data"]
+            if len(response["data"]):
+                goods += response["data"]
 
-    filtered_goods = filter(lambda x: x['category']["id"] not in categories_to_filter, goods)
+        filtered_goods = filter(lambda x: x['category']["id"] not in categories_to_filter, goods)
 
-    global json_goods
+        global json_goods
 
-    json_goods = {"data": list(filtered_goods)}
-    print("goods successfully updates")
-    time.sleep(20)
-    get_all_goods()
+        json_goods = {"data": list(filtered_goods)}
+        print("goods successfully updates")
+        time.sleep(20)
+        get_all_goods()
 
 
 
 t = threading.Thread(target=get_all_goods).start()
-
+upd_order_task = threading.Thread(target=update_order_task).start()
 
 @app.get("/api/v1/alldiscounts/")
 def get_discounts():
